@@ -307,12 +307,10 @@ The following folders are planned; their contents will be added as implementatio
 - [ ] Measure timing, interface responsiveness, and sustained operation.
 - [ ] Publish wiring, build instructions, test evidence, and gameplay video.
 
-## Engineering Notes and Attribution
+## Reflection and Attribution
 
 Design notes will document real implementation decisions and debugging cases: observed symptoms, hypotheses, measurements, root causes, corrections, and verification. Particular attention will go to the difference between a precise timer and an accurate end-to-end reaction measurement, and to preserving valid scores while handling Flash constraints.
 
 The LCD driver may reuse or adapt work from my STM32 oscilloscope project. Any tutorial-derived or third-party code will retain its source attribution and license notices. Original application logic, generated STM32 support code, and adapted drivers will be identified separately.
 
 **Reference documentation to be added:** NUCLEO-L432KC board documentation, STM32L432 datasheet/reference manual, LCD module/controller documentation, and the selected I²C expander datasheet, including the revisions used.
-
-**License:** To be selected for original project code after reviewing included dependency and driver licenses.
