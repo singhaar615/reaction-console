@@ -2,7 +2,6 @@
 
 **An interactive embedded game console exploring reaction timing, sequence memory, and event-driven firmware on the STM32.**
 
-**Author:** Aaruni Singh · Electrical Engineering, Purdue University  
 **Platform:** STM32 NUCLEO-L432KC  
 **Interfaces:** GPIO · Hardware timers · SPI · I²C · SWD  
 **Firmware focus:** Embedded C · Finite state machines · Interrupts · Internal Flash storage  
