@@ -84,11 +84,11 @@ Power-cycle retention, interrupted-save recovery, and behavior during firmware r
 
 | Folder | Contents |
 | --- | --- |
-| `firmware/` | CubeMX configuration, C source, linker files, and dependencies |
-| `hardware/` | Prototype schematic, pin map, and BOM |
-| `docs/` | Architecture, build guide, and design decisions |
-| `tests/` | Game-logic tests, hardware results, and analyzer captures |
-| `media/` | Prototype photos, UI images, and gameplay video |
+| `Firmware/` | CubeMX configuration, C source, linker files, and dependencies |
+| `Hardware/` | Prototype schematic, pin map, and BOM |
+| `Docs/` | Architecture, build guide, and design decisions |
+| `Tests/` | Game-logic tests, hardware results, and analyzer captures |
+| `Media/` | Prototype photos, UI images, and gameplay video |
 
 ## Development Checklist
 
