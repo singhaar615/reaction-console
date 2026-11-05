@@ -1,108 +1,61 @@
 # STM32-Based Cognitive Training Console
 
-An interactive embedded game console exploring reaction timing, sequence memory, and event-driven firmware.
+An STM32-based reaction-time console using physical buttons, LED cues, and an LCD for interactive gameplay.
 
 **Platform:** STM32 NUCLEO-L432KC  
-**Interfaces:** GPIO · Hardware timers · SPI · I²C · SWD  
-**Firmware:** Embedded C · Finite state machines · Interrupts · Internal Flash  
-**Status:** Planning and prototyping. Specifications are design targets, not measured results.
+**Interfaces:** GPIO · Hardware timers · SPI · I²C  
+**Firmware:** Embedded C · Finite state machines · Internal Flash  
+**Status:** Planning and prototyping. Features below describe the intended implementation.
 
 ## Overview
 
-This project combines physical controls, LED cues, and an LCD interface into a tabletop console with three games and persistent personal bests.
+This project focuses on developing firmware for a simple reaction-time game while integrating an SPI LCD, I²C-controlled LEDs, and nonvolatile score storage.
 
-It builds on the display and hardware integration work from my STM32 oscilloscope project, adding game logic, timestamped input handling, and Flash storage.
+The initial version will support one game, basic display feedback, and a saved personal best.
 
-“Cognitive training” describes the game theme; the project does not assess clinical cognitive function or claim demonstrated cognitive improvement.
+## Gameplay
 
-## Game Modes
+1. Press the button to start.
+2. Wait for an LED cue after a randomized delay.
+3. Press the button as soon as the LED turns on.
+4. View the response time and personal best on the LCD.
+5. Press the button to play again.
 
-| Mode | Gameplay | Scoring |
-| --- | --- | --- |
-| **Reaction Time** | Respond to LED 1 after a random 2–5 second delay. Complete five attempts with a 2-second response limit. | Displays fastest and mean valid response times. A personal best requires five valid attempts and uses the session mean. |
-| **Go / No-Go** | Complete 20 trials: 14 Go cues requiring button 1 and six No-Go cues requiring no response. Each has a 1-second response window. | Ranked by accuracy, then mean correct-Go response time when available. |
-| **Sequence Memory** | Repeat LED sequences that grow from three to 12 positions. Each cue lasts 500 ms with a 250 ms gap. | Longest completed sequence. A wrong entry or 5-second input timeout ends the session. |
+Pressing before the cue displays an early-press message and restarts the round. A response timeout ends the round without saving a score.
 
-Early presses and incorrect responses are penalized according to each game's rules. Invalid Reaction Time attempts consume an attempt but are excluded from timing statistics.
+## Hardware
 
-## Hardware and Controls
+- **STM32 NUCLEO-L432KC:** Runs the game firmware.
+- **SPI LCD:** Displays instructions, response times, and the best score.
+- **Push button:** Connected to GPIO for starting rounds and responding to cues.
+- **Cue and status LEDs:** Controlled through an I²C GPIO expander.
+- **USB power:** Powers the development board.
 
-- **STM32 NUCLEO-L432KC:** Main controller and debugging platform.
-- **SPI graphical LCD:** Menus, instructions, progress, and results.
-- **Four response buttons:** Connected directly to MCU GPIO for timestamped input.
-- **Four cue LEDs:** Driven through a 3.3 V-compatible I²C GPIO expander.
-- **Center button:** Start, confirm, and exit.
-- **USB power:** Development-board supply.
-
-The LCD variant, expander, pin assignments, pull-ups, and LED resistor values are pending final selection and verification.
-
-| Context | Controls |
-| --- | --- |
-| Main menu | Button 1: previous; button 4: next; center: select |
-| Instructions | Center: start; hold center: return |
-| Gameplay | Buttons 1–4 respond to cues |
-| Results | Center: replay; button 4: menu |
-| Active game | Hold center for 1 second to abort without saving |
-| Settings | View or reset records; reset requires confirmation |
+Component selections, wiring, and pin assignments will be documented during prototyping.
 
 ## Firmware Design
 
-A bare-metal cooperative event loop coordinates game states, input events, display updates, and storage.
+- **GPIO:** Reads button input with software debouncing.
+- **Hardware timers:** Manage cue delays and measure response time.
+- **Finite state machine:** Controls idle, waiting, cue, and result states.
+- **SPI:** Updates the LCD with game instructions and results.
+- **I²C:** Controls cue and status LEDs.
+- **Internal Flash:** Stores the fastest valid response time and loads it at startup.
 
-- **Input handling:** Short GPIO interrupt handlers capture button edges and timestamps; debounce qualification runs outside interrupts.
-- **Timing:** Hardware timers schedule cues and deadlines without blocking gameplay.
-- **State machines:** Manage menus, preparation, cues, responses, results, and faults.
-- **Display:** Event-driven SPI updates, with no full-screen redraw during timed response windows.
-- **Cue control:** I²C transactions drive LEDs; failed transactions invalidate the affected trial.
-- **Error handling:** Detect queue overflow, held buttons, invalid inputs, and communication failures.
-
-Accepted button events retain their initial edge timestamps after debounce qualification. Cue latency and timestamp accuracy will be measured against physical LED and button edges.
-
-## Design Targets
-
-| Parameter | Target |
-| --- | --- |
-| Timer tick | 1 µs |
-| Displayed response resolution | 1 ms |
-| End-to-end timing error | ≤2 ms |
-| Initial debounce qualification | 10 ms, adjusted after testing |
-| Menu feedback | Within 100 ms of qualified input |
-| Initial I²C clock | 100 kHz |
-| Persistent storage | Personal best for each game |
-
-Timer resolution does not guarantee measurement accuracy. These targets require bench validation.
-
-## Persistent Scores
-
-Personal bests will be stored in internal Flash and loaded at startup.
-
-The planned storage design uses versioned records, integrity checks, commit markers, and two reserved erase units to support recovery from interrupted writes. Writes occur outside timed gameplay, only for improved records or confirmed resets.
-
-Power-cycle retention, interrupted-save recovery, and behavior during firmware reprogramming will be tested and documented.
-
-## Planned Repository Structure
-
-| Folder | Contents |
-| --- | --- |
-| `Firmware/` | CubeMX configuration, C source, linker files, and dependencies |
-| `Hardware/` | Prototype schematic, pin map, and BOM |
-| `Docs/` | Architecture, build guide, and design decisions |
-| `Tests/` | Game-logic tests, hardware results, and analyzer captures |
-| `Media/` | Prototype photos, UI images, and gameplay video |
+Flash writes occur after a round finishes and only when a new personal best is achieved. Display updates occur outside the response-timing window.
 
 ## Development Checklist
 
-- [ ] Finalize components, pin assignments, and electrical compatibility.
-- [ ] Bring up the LCD, buttons, and cue LEDs.
-- [ ] Implement timestamps, debouncing, event handling, and state machines.
-- [ ] Complete and validate all three games.
-- [ ] Implement Flash records and test interrupted-save recovery.
-- [ ] Verify timing accuracy, timer rollover, and interface behavior.
-- [ ] Test communication faults, queue overflow, and repeated sessions.
-- [ ] Publish wiring, reproducible build instructions, results, and a demo.
+- [ ] Connect and test the button, LCD, and I²C-controlled LEDs.
+- [ ] Implement button debouncing and timer-based response measurement.
+- [ ] Build the reaction-time game state machine.
+- [ ] Display instructions, early presses, timeouts, and results.
+- [ ] Save and restore the personal best using internal Flash.
+- [ ] Test repeated rounds, response timing, and score retention after a power cycle.
+- [ ] Document wiring, setup instructions, and a gameplay demo.
 
-The first release focuses on a Nucleo-based prototype. Custom PCB fabrication, wireless connectivity, mobile apps, and an RTOS are outside scope.
+## Scope
 
-## References and Attribution
+The first version is a Nucleo-based prototype with one reaction-time game. Additional games, advanced menus, custom PCBs, wireless connectivity, and an RTOS are outside the initial scope.
 
-Hardware documentation and tool versions will accompany the implementation. Reused LCD code, third-party drivers, and generated STM32 support files will be identified, with original attribution and license notices preserved.
+“Cognitive training” describes the game theme; no clinical assessment or demonstrated cognitive improvement is claimed.
